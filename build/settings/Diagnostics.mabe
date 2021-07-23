@@ -1,6 +1,6 @@
 random_seed = 0;                // Seed for random number generator; use 0 to base on time.
 Value pop_size = 512;
-Value num_gens = 50000;
+Value num_gens = 1500;
 
 Population main_pop;
 Population next_pop;
@@ -71,14 +71,14 @@ MovePopulation sync_gen {       // Move organisms from one populaiton to another
   to_pop = "main_pop";          // Population to move organisms into.
   reset_to = 1;                 // Should we erase organisms at the destination?
 }
-ValsOrg vals_org {              // Organism consisting of a series of N floating-point values.
+ValsOrgGenome vals_org {              // Organism consisting of a series of N floating-point values.
   _active = 1;                  // Should we activate this module? (0=off, 1=on)
   _desc = "";                   // Special description for those object.
   N = 100;                      // Number of values in organism
   mut_prob = 0.007;              // Probability of each value mutating on reproduction.
   mut_size = 1.0;               // Standard deviation on size of mutations.
-  min_value = 0;                // Lower limit for value fields.
-  max_value = 100;              // Upper limit for value fields.
+  min_value = 5.0;                // Lower limit for value fields.
+  max_value = 20;              // Upper limit for value fields.
   lower_bound = "clamp";        // How should the lower limit be enforced?
                                 // - "no_limit": Allow values to be arbirarily low.
                                 // - "clamp": Reduce too-low values to min_value.

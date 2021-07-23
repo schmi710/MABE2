@@ -12,6 +12,8 @@
 #include "evaluate/static/EvalDiagnostic.hpp"
 #include "evaluate/static/EvalMatchBits.hpp"
 #include "evaluate/static/EvalNK.hpp"
+#include "evaluate/static/EvalSuperPerms.hpp"
+#include "evaluate/static/EvalSuperPermsHead.hpp"
 
 // Interface Modules
 #include "interface/CommandLine.hpp"
@@ -33,3 +35,8 @@
 #include "orgs/AvidaGPOrg.hpp"
 #include "orgs/BitsOrg.hpp"
 #include "orgs/ValsOrg.hpp"
+#include "orgs/BitsOrgGenome.hpp"
+#include "orgs/ValsOrgGenome.hpp"
+#include "orgs/BitsOrgGenomeHead.hpp"
+#include "orgs/IntsOrgGenomeHead.hpp"
+#include "orgs/BytesOrgGenomeHead.hpp"

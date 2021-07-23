@@ -14,7 +14,7 @@ SelectLexicase select_l;
 
 GrowthPlacement place_next;
 MovePopulation sync_gen;
-ValsOrg vals_org;
+ValsOrgGenome vals_org;
 
 @start() print("random_seed = ", random_seed, "\n");
 @start() inject("vals_org", "main_pop", pop_size);
