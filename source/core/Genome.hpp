@@ -778,7 +778,7 @@ namespace mabe {
     size_t min_size = 0;
     size_t max_size = static_cast<size_t>(-1);
 
-    double const alphabet_size = 2.0;
+    double alphabet_size = 2.0;
 
     emp::Binomial mut_dist;
     emp::BitVector mut_sites;

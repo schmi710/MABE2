@@ -50,7 +50,7 @@ MovePopulation sync_gen {       // Move organisms from one populaiton to another
   reset_to = 1;                 // Should we erase organisms at the destination?
 }
 
-BitsOrgGenomeHead bits_org {              // Organism consisting of a series of N bits.
+BitsOrgGenomeHeadBrain bits_org {              // Organism consisting of a series of N bits.
   output_name = "bits";         // Name of variable to contain bit sequence.
   N = 19;                // Number of bits in organism
   mut_prob = 0.01;		// Probability of each bit mutating on reproduction.

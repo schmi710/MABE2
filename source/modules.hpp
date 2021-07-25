@@ -40,3 +40,4 @@
 #include "orgs/BitsOrgGenomeHead.hpp"
 #include "orgs/IntsOrgGenomeHead.hpp"
 #include "orgs/BytesOrgGenomeHead.hpp"
+#include "orgs/BitsOrgGenomeHeadBrain.hpp"
