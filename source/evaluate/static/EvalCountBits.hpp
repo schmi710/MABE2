@@ -12,6 +12,8 @@
 
 #include "../../core/MABE.hpp"
 #include "../../core/Module.hpp"
+#include "../../core/Genome.hpp"
+
 
 #include "emp/datastructs/reference_vector.hpp"
 
@@ -50,7 +52,7 @@ namespace mabe {
     }
 
     void SetupModule() override {
-      AddRequiredTrait<emp::BitVector>(bits_trait);
+      AddRequiredTrait<Genome::Head>(bits_trait);
       AddOwnedTrait<double>(fitness_trait, "All-ones fitness value", 0.0);
     }
 
@@ -66,11 +68,22 @@ namespace mabe {
         org.GenerateOutput();
 
         // Count the number of ones in the bit sequence.
-        const emp::BitVector & bits = org.GetVar<emp::BitVector>(bits_trait);
-        double fitness = (double) bits.CountOnes();
+        //const emp::BitVector & bits = org.GetVar<emp::BitVector>(bits_trait);
+
+        Genome::Head head = org.GetVar<Genome::Head>(bits_trait);
+
+        double fitness = 0.0;
+        double total = 0.0;
+
+        while (head.IsValid()) {
+          fitness += head.ReadBit();
+          total += 1;
+        }
+        
+        //(double) bits.CountOnes();
 
         // If we were supposed to count zeros, subtract ones count from total number of bits.
-        if (count_type == 0) fitness = bits.size() - fitness;
+        if (count_type == 0) fitness = total - fitness;
 
         // Store the count on the organism in the fitness trait.
         org.SetVar<double>(fitness_trait, fitness);

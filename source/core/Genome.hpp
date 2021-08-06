@@ -103,6 +103,10 @@ namespace mabe {
     virtual void Clear() = 0;
     virtual void SetAll() = 0;
 
+
+    // should be removed once GenomeManager is a thing
+    virtual size_t Mutate(emp::Random & random, double _mut)  = 0;
+
     // NEED READS AND WRITES THAT ARE RESTRICTED TO A RANGE
     // EXAMPLE:
     // virtual int ReadInt(size_t index, int min, int max) const = 0;
@@ -213,6 +217,55 @@ namespace mabe {
       }
       Head & MultiWriteBit(emp::BitVector values) {
         genome->MultiWriteBit(pos, values);
+        return Advance(values.GetSize()); 
+      }
+
+      int ReadScaledInt(int min_v, int max_v) { int out = IsValid() ? genome->ReadScaledInt(pos,  min_v,  max_v) : 0; Advance(); return out; }
+      double ReadScaledDouble(double min_v, double max_v) { double out = IsValid() ? genome->ReadScaledDouble(pos,  min_v,  max_v) : 0; Advance(); return out; }
+      std::byte ReadScaledByte(std::byte min_v, std::byte max_v) { std::byte out = IsValid() ? genome->ReadScaledByte(pos,  min_v,  max_v) : std::byte(0); Advance(); return out; }
+      bool ReadScaledBit(bool min_v=0, bool max_v=1) { bool out = IsValid() ? genome->ReadScaledBit(pos,  min_v,  max_v) : 0; Advance(); return out; }
+
+
+      Head & WriteScaledInt(int value, int min_v, int max_v) { if (IsValid()) genome->WriteScaledInt(pos, value,  min_v,  max_v); return Advance(); }
+      Head & WriteScaledDouble(double value, double min_v, double max_v) { if (IsValid()) genome->WriteScaledDouble(pos, value,  min_v,  max_v); return Advance(); }
+      Head & WriteScaledByte(std::byte value, std::byte min_v, std::byte max_v) { if (IsValid()) genome->WriteScaledByte(pos, value,  min_v,  max_v); return Advance(); }
+      Head & WriteScaledBit(bool value, bool min_v=0, bool max_v=1) { if (IsValid()) genome->WriteScaledBit(pos, value,  min_v,  max_v); return Advance(); }
+
+      emp::vector<int> MultiReadScaledInt(size_t dist, int min_v, int max_v) { 
+        emp::vector<int> outvec = genome->MultiReadScaledInt(pos, dist, min_v, max_v);
+        Advance(dist); 
+        return outvec;
+      }
+      emp::vector<double> MultiReadScaledDouble(size_t dist, double min_v, double max_v) { 
+        emp::vector<double> outvec = genome->MultiReadScaledDouble(pos, dist,  min_v,  max_v);
+        Advance(dist); 
+        return outvec;
+      }
+      emp::vector<std::byte> MultiReadScaledByte(size_t dist, std::byte min_v, std::byte max_v) { 
+        emp::vector<std::byte> outvec = genome->MultiReadScaledByte(pos, dist,  min_v,  max_v);
+        Advance(dist); 
+        return outvec;
+      }
+      emp::BitVector MultiReadScaledBit(size_t dist, bool min_v=0, bool max_v=1) { 
+        emp::BitVector outvec = genome->MultiReadScaledBit(pos, dist,  min_v,  max_v);
+        Advance(dist); 
+        return outvec;
+      }
+
+      Head & MultiWriteScaledInt(emp::vector<int> values, int min_v, int max_v) { 
+        genome->MultiWriteScaledInt(pos, values, min_v, max_v);
+        return Advance(values.size()); 
+      }
+      Head & MultiWriteScaledDouble(emp::vector<double> values, double min_v, double max_v) {
+        genome->MultiWriteScaledDouble(pos, values,  min_v,  max_v);
+        return Advance(values.size()); 
+      }
+      Head & MultiWriteScaledByte(emp::vector<std::byte> values, std::byte min_v, std::byte max_v) {
+        genome->MultiWriteScaledByte(pos, values,  min_v,  max_v);
+        return Advance(values.size()); 
+      }
+      Head & MultiWriteScaledBit(emp::BitVector values, bool min_v=0, bool max_v=1) {
+        genome->MultiWriteScaledBit(pos, values,  min_v,  max_v);
         return Advance(values.GetSize()); 
       }
 
@@ -716,9 +769,11 @@ namespace mabe {
     
 
     size_t Mutate(emp::Random & random) override {
-      
-      mut_dist.Setup(mut_p, data.size()); // NEEDED HERE?????
-      mut_sites.Resize(data.size()); // NEEDED HERE?????
+
+      if (mut_sites.GetSize() != data.size()) {
+        mut_dist.Setup(mut_p, data.size()); // NEEDED HERE?????
+        mut_sites.Resize(data.size()); // NEEDED HERE?????
+      }
 
       const size_t num_muts = mut_dist.PickRandom(random);
 
@@ -762,6 +817,12 @@ namespace mabe {
       mut_p = _mut;
       min_val = _min_val;
       alphabet_size = _alphabet_size;
+    };
+
+     // get rid of this when genomemanager shows up
+    size_t Mutate(emp::Random & random, double _mut) override {
+      mut_p = _mut;
+      return Mutate(random);
     };
 
     
@@ -996,8 +1057,8 @@ namespace mabe {
 
     emp::BitVector GetAllBits() const {return data;}
 
-
-    size_t Mutate(emp::Random & random, double _mut) {
+    // get rid of this when genomemanager shows up
+    size_t Mutate(emp::Random & random, double _mut) override {
       mut_p = _mut;
       return Mutate(random);
     };

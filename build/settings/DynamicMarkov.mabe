@@ -7,11 +7,11 @@ Value pop_size = 1000;
 CommandLine cl {                // Handle basic I/O on the command line.
   target_pop = "main_pop";      // Which population should we print stats about?
 }
-EvalSuperPermsHead eval_super_perms {                // Evaluate bitstrings on an NK fitness lanscape.
+EvalCountBits eval_super_perms {                // Evaluate bitstrings on an NK fitness lanscape.
   target = "main_pop";          // Which population should we evaluate?
   bits_trait = "bits";          // Which trait stores the bit sequence to evaluate?
   fitness_trait = "fitness";    // Which trait should we store NK fitness in?
-  count_length = 4;                        // How long our patterns are
+  //count_length = 5;                        // How long our patterns are
 }
 
 FileOutput output {
@@ -50,11 +50,12 @@ MovePopulation sync_gen {       // Move organisms from one populaiton to another
   reset_to = 1;                 // Should we erase organisms at the destination?
 }
 
-
-BitsOrgGenomeHeadBrain bits_org {              // Organism consisting of a series of N bits.
+DynamicOrg bits_org {          // Dynamic organism that can take any number of genomes and brains.
+  genomes = "bit_genome";      // Types of genomes to use.
+  brains = "basic_brain_head";       // Types of brains to use.
   output_name = "bits";         // Name of variable to contain bit sequence.
-  N = 19;                // Number of bits in organism
-  mut_prob = 0.01;		// Probability of each bit mutating on reproduction.
+  N = 64;                // Number of bits in organism
+  mut_prob = 0.001;		// Probability of each bit mutating on reproduction.
   //max_value = 5;		// Maximum value (exclusive)
 }
 

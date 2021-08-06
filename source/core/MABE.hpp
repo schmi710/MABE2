@@ -39,6 +39,7 @@
 #include "Population.hpp"
 #include "SigListener.hpp"
 #include "TraitManager.hpp"
+#include "Genome.hpp"
 
 namespace mabe {
 

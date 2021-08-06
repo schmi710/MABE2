@@ -46,58 +46,21 @@ namespace mabe {
     };
 
     /// Use "to_string" to convert.
-    std::string ToString() const override { return emp::to_string(genome); }
+    std::string ToString() const override { return "ima head out: " + emp::to_string(genome); }
 
-    size_t Mutate(emp::Random & random) override {
+    size_t Mutate(emp::Random & random) override { return genome.Mutate(random, SharedData().mut_prob); }
 
+    void Randomize(emp::Random & random) override { genome.Randomize(random); }
 
-
-      /*
-      const size_t num_muts = SharedData().mut_dist.PickRandom(random);
-
-      if (num_muts == 0) return 0;
-      if (num_muts == 1) {
-        const size_t pos = random.GetUInt(bits.size());
-        bits.Toggle(pos);
-        return 1;
-      }
-
-      // Only remaining option is num_muts > 1.
-      auto & mut_sites = SharedData().mut_sites;
-      mut_sites.Clear();
-      for (size_t i = 0; i < num_muts; i++) {
-        const size_t pos = random.GetUInt(bits.size());
-        if (mut_sites[pos]) { --i; continue; }  // Duplicate position; try again.
-        mut_sites.Set(pos);
-      }
-      bits ^= mut_sites;
-
-      return num_muts;
-      */
-
-      return genome.Mutate(random, SharedData().mut_prob);
-    }
-
-    void Randomize(emp::Random & random) override {
-      //emp::RandomizeBitVector(bits, random, 0.5);
-      genome.Randomize(random);
-    }
-
-    void Initialize(emp::Random & random) override {
-      //if (SharedData().init_random) emp::RandomizeBitVector(bits, random, 0.5);
-      if (SharedData().init_random) genome.Randomize(random);
-    }
+    void Initialize(emp::Random & random) override { if (SharedData().init_random) genome.Randomize(random); }
 
     /// Put the bits in the correct output position.
     void GenerateOutput() override {
-      SetVar<emp::BitVector>(SharedData().output_name, genome.GetAllBits());
+      SetVar<Genome::Head>(SharedData().output_name, Genome::Head(genome));
     }
 
     /// Setup this organism type to be able to load from config.
     void SetupConfig() override {
-      //GetManager().LinkFuns<size_t>([this](){ return bits.size(); },
-      //                 [this](const size_t & N){ return bits.Resize(N); },
-      //                 "N", "Number of bits in organism");
       GetManager().LinkFuns<size_t>([this](){ return genome.GetSize(); },
                        [this](const size_t & N){ return genome.Resize(N); },
                        "N", "Number of bits in organism");
@@ -120,7 +83,8 @@ namespace mabe {
       // Setup the output trait.
       GetManager().AddSharedTrait(SharedData().output_name,
                                   "Bitset output from organism.",
-                                  emp::BitVector(0));
+      //                            emp::BitVector(0));
+                                  Genome::Head(genome));
     }
   };
 

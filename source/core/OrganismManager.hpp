@@ -119,7 +119,6 @@ namespace mabe {
 
 #define MABE_REGISTER_ORG_TYPE(TYPE, DESC) \
         mabe::OrgManagerRegistrar<OrganismManager<TYPE>> MABE_ ## TYPE ## _Registrar(#TYPE, DESC)
-
 }
 
 #endif

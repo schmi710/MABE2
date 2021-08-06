@@ -14,6 +14,7 @@
 #include "evaluate/static/EvalNK.hpp"
 #include "evaluate/static/EvalSuperPerms.hpp"
 #include "evaluate/static/EvalSuperPermsHead.hpp"
+#include "evaluate/static/EvalAagos.hpp"
 
 // Interface Modules
 #include "interface/CommandLine.hpp"
@@ -41,3 +42,4 @@
 #include "orgs/IntsOrgGenomeHead.hpp"
 #include "orgs/BytesOrgGenomeHead.hpp"
 #include "orgs/BitsOrgGenomeHeadBrain.hpp"
+#include "orgs/DynamicOrg.hpp"
