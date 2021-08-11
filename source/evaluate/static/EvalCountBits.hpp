@@ -52,7 +52,8 @@ namespace mabe {
     }
 
     void SetupModule() override {
-      AddRequiredTrait<Genome::Head>(bits_trait);
+      //AddRequiredTrait<Genome::Head>(bits_trait);
+      AddRequiredTrait<emp::DataMap>(bits_trait);
       AddOwnedTrait<double>(fitness_trait, "All-ones fitness value", 0.0);
     }
 
@@ -70,7 +71,11 @@ namespace mabe {
         // Count the number of ones in the bit sequence.
         //const emp::BitVector & bits = org.GetVar<emp::BitVector>(bits_trait);
 
-        Genome::Head head = org.GetVar<Genome::Head>(bits_trait);
+        //Genome::Head head = org.GetVar<Genome::Head>(bits_trait);
+
+        emp::DataMap dm = org.GetVar<emp::DataMap>(bits_trait);
+
+        Genome::Head head = dm.Get<Genome::Head>(bits_trait);
 
         double fitness = 0.0;
         double total = 0.0;

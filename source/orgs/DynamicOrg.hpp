@@ -15,6 +15,7 @@
 #include "../core/Organism.hpp"
 #include "../core/OrganismManager.hpp"
 #include "../core/Genome.hpp"
+#include "../brains/AagosBrain.hpp"
 
 #include "emp/bits/BitVector.hpp"
 #include "emp/math/Distribution.hpp"
@@ -33,7 +34,7 @@ namespace mabe {
     
     
     emp::vector<emp::Ptr<Genome>> genome_vec;
-    emp::vector<emp::Ptr<Brain>> brain_vec;
+    emp::vector<emp::Ptr<DynamicBrain>> brain_vec;
 
 
     size_t size;
@@ -42,23 +43,17 @@ namespace mabe {
     DynamicOrg(OrganismManager<DynamicOrg> & _manager)
       : OrganismTemplate<DynamicOrg>(_manager), size(150){ 
           ClearAll();
-          // fix_with_manager
-          //genome_vec.push_back(emp::NewPtr<TypedGenome<bool>>(TypedGenome<bool>(size)));
-          //brain_vec.push_back(emp::NewPtr<BasicBrainHead>());
       }
     //DynamicOrg(const DynamicOrg &) = default;
     DynamicOrg(const DynamicOrg & in): OrganismTemplate<DynamicOrg>(in), mut_probs(in.mut_probs), map(in.map), size(in.size){
     //DynamicOrg(const DynamicOrg & in): OrganismTemplate<DynamicOrg>(OrganismManager<DynamicOrg>((OrganismManager<DynamicOrg> &) in.GetManager())), mut_probs(in.mut_probs), map(in.map), genome(in.genome){
         ClearAll();
-        
         for (size_t i = 0; i < in.genome_vec.size(); i++) {
             genome_vec.push_back(in.genome_vec[i]->Clone());
         }
         for (size_t i = 0; i < in.brain_vec.size(); i++) {
             brain_vec.push_back(in.brain_vec[i]->Clone());
         }
-        
-        
     }
     //DynamicOrg(DynamicOrg &&) = default;
     DynamicOrg(DynamicOrg && in): OrganismTemplate<DynamicOrg>(in.GetManager()), mut_probs(in.mut_probs), map(in.map), size(in.size){
@@ -70,14 +65,11 @@ namespace mabe {
             brain_vec.push_back(in.brain_vec[i]->Clone());
         }
     }
-    DynamicOrg(const emp::vector<emp::Ptr<Genome>> genomes_in, const emp::vector<emp::Ptr<Brain>> brains_in, size_t N,
+    DynamicOrg(const emp::vector<emp::Ptr<Genome>> genomes_in, const emp::vector<emp::Ptr<DynamicBrain>> brains_in, size_t N,
     OrganismManager<DynamicOrg> & _manager)
       : OrganismTemplate<DynamicOrg>(_manager), size(N){ 
             ClearAll();
-            // fix_with_manager
             for (size_t i = 0; i < genomes_in.size(); i++) {
-                //genome_vec.push_back(genomes_in[i]);
-                //genome_vec.push_back(emp::NewPtr<TypedGenome<bool>>(genome));
                 genome_vec.push_back(genomes_in[i]->Clone());
             }
             for (size_t i = 0; i < brains_in.size(); i++) {
@@ -87,12 +79,6 @@ namespace mabe {
     DynamicOrg(size_t N, OrganismManager<DynamicOrg> & _manager)
       : OrganismTemplate<DynamicOrg>(_manager), size(N){ 
           ClearAll();
-          // fix_with_manager
-          //genome_vec.push_back(emp::NewPtr<TypedGenome<bool>>(TypedGenome<bool>(size)));
-          //genome_vec.push_back(emp::NewPtr<TypedGenome<bool>>(genome));
-
-          //brain_vec.push_back(emp::NewPtr<BasicBrainHead>());
-          
       }
     ~DynamicOrg() { 
         for (size_t i = 0; i < genome_vec.size(); i++) {
@@ -188,18 +174,17 @@ namespace mabe {
     void initBrains(emp::Random & random) {
       emp::vector<std::string> split_brains;
       emp::slice(SharedData().brains, split_brains, ',');
+      map.Set<emp::vector<emp::Ptr<Genome>>>("genomes", genome_vec);
       for(size_t i = 0; i < split_brains.size(); i++) {
-
-
         if (split_brains[i].compare("aagos_brain") == 0) {
-          //brain_vec.push_back(emp::NewPtr<AagosBrain>(genomes););
+          //brain_vec.push_back(emp::NewPtr<AagosBrain>(genome_vec));             // Fix this with brain configuration. The brain should be told which genomes to use.
         } else if (split_brains[i].compare("markov_brain") == 0) {
-          emp::Ptr<MarkovBrain> markov_brain = emp::NewPtr<MarkovBrain>();
-          markov_brain->rebuild(Genome::Head(*(genome_vec[0])));                // OI FIX THIS AAAAA
+          emp::Ptr<MarkovBrain> markov_brain = emp::NewPtr<MarkovBrain>(emp::vector<size_t>({0})); // Fix this with brain configuration. The brain should be told which genomes to use.
           brain_vec.push_back(markov_brain);
         } else if (split_brains[i].compare("basic_brain_head") == 0) {
-          brain_vec.push_back(emp::NewPtr<BasicBrainHead>());
+          brain_vec.push_back(emp::NewPtr<BasicBrainHead>(emp::vector<size_t>({0})));               // Fix this with brain configuration. The brain should be told which genomes to use.
         }
+        brain_vec[i]->initializeGenomes(map);
       }
       
     }
@@ -216,18 +201,17 @@ namespace mabe {
 
     /// Put the bits in the correct output position.
     void GenerateOutput() override {
-
-      
-
-      map.Set<emp::Ptr<Organism>>("organism", emp::Ptr<Organism>(this));
+      emp::DataMap temp;
+  
       map.Set<emp::vector<emp::Ptr<Genome>>>("genomes", genome_vec);
       map.Set<emp::Ptr<emp::DataMap>>("data_map", & GetDataMap());
+      map.Set<emp::Ptr<emp::DataMap>>("output", & temp);
       for (size_t i = 0; i < brain_vec.size(); i++) {
+        brain_vec[i]->rebuild(map);
         brain_vec[i]->process(map);
       }
 
-
-
+      SetVar<emp::DataMap>(SharedData().output_name, temp);
     }
 
     /// Setup this organism type to be able to load from config.
@@ -244,16 +228,12 @@ namespace mabe {
       GetManager().LinkVar(SharedData().init_random, "init_random",
                       "Should we randomize ancestor?  (0 = all zeros)");
 
-      TypedGenome<bool> temp(50);
-      //map.AddVar<Genome::Head>("output", Genome::Head(temp));
 
       map.AddVar<std::string>("output_name", SharedData().output_name);
-      map.AddVar<emp::Ptr<Organism>>("organism", emp::Ptr<Organism>(this));
-
       map.AddVar<emp::vector<emp::Ptr<Genome>>>("genomes", genome_vec);
-
       map.AddVar<emp::Ptr<emp::DataMap>>("data_map", & GetDataMap());
-      
+      emp::DataMap temp;
+      map.AddVar<emp::Ptr<emp::DataMap>>("output", & temp);
     }
 
     /// Setup this organism type with the traits it need to track.
@@ -265,15 +245,15 @@ namespace mabe {
       SharedData().mut_sites.Resize(size);
 
       // Setup the output trait.
-      TypedGenome<bool> temp(50);
+      //TypedGenome<bool> temp(50);
+      emp::DataMap temp;
       GetManager().AddSharedTrait(SharedData().output_name,
                                   "Bitset output from organism.",
-      //                            emp::BitVector(0));
-                                  Genome::Head(temp));
+                                  temp);
     }
   };
 
-  MABE_REGISTER_ORG_TYPE(DynamicOrg, "Organism consisting of a series of N bits. Uses new Genome class.");
+  MABE_REGISTER_ORG_TYPE(DynamicOrg, "A dynamically created organism composed of a series of Brains and Genomes.");
 }
 
 #endif
