@@ -136,6 +136,11 @@ namespace mabe {
 
             Gate(emp::vector<int> in, emp::vector<int> out, emp::BitVector t): input_ids(in), output_ids(out), table(t) {};
 
+            Gate() {};
+            ~Gate() { ; }
+            Gate(const Gate &) = default;
+            Gate & operator=(const Gate &) = default;
+
 
             friend std::string to_string(Gate const& self) {
                 return emp::ToString(self.input_ids) + emp::ToString(self.output_ids) + self.table.ToString();
